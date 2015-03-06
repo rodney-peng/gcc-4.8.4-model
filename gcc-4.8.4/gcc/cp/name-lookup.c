@@ -799,6 +799,10 @@ pushdecl_maybe_friend_1 (tree x, bool is_friend)
 	      if (olddecl == error_mark_node)
 		return error_mark_node;
 
+#ifdef CXXMODEL
+        if (opt_cxxspec && olddecl == x) return x;
+#endif
+
 	      if (olddecl)
 		{
 		  if (TREE_CODE (t) == TYPE_DECL)

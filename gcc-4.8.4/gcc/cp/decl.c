@@ -1209,6 +1209,22 @@ validate_constexpr_redeclaration (tree old_decl, tree new_decl)
   return false;
 }
 
+
+#ifdef CXXMODEL
+tree redefine_decl( tree newdecl, tree olddecl )
+{
+  while (LANG_DECL_FN_REDEFINE(olddecl))
+      olddecl = LANG_DECL_FN_REDEFINE(olddecl);
+
+  LANG_DECL_FN_REDEFINE(olddecl) = newdecl;
+
+  LANG_DECL_FN_ORIGIN(newdecl)   = olddecl;
+  LANG_DECL_FN_REVISION(newdecl) = LANG_DECL_FN_REVISION(olddecl) + 1;
+
+  return newdecl;
+}
+#endif
+
 #define GNU_INLINE_P(fn) (DECL_DECLARED_INLINE_P (fn)			\
 			  && lookup_attribute ("gnu_inline",		\
 					       DECL_ATTRIBUTES (fn)))
@@ -1602,6 +1618,14 @@ duplicate_decls (tree newdecl, tree olddecl, bool newdecl_is_friend)
   else
     {
       const char *errmsg = redeclaration_error_message (newdecl, olddecl);
+
+#ifdef CXXMODEL
+      if (opt_cxxspec && errmsg && TREE_CODE(olddecl) == FUNCTION_DECL && DECL_LANG_SPECIFIC(STRIP_TEMPLATE(olddecl))->u.base.selector == 1)
+  {
+    return redefine_decl( newdecl, olddecl );
+  }
+      else
+#endif
       if (errmsg)
 	{
 	  error_at (DECL_SOURCE_LOCATION (newdecl), errmsg, newdecl);
@@ -1665,6 +1689,12 @@ duplicate_decls (tree newdecl, tree olddecl, bool newdecl_is_friend)
 		     DECL_LANGUAGE (newdecl));
 	    }
 	}
+#ifdef CXXMODEL
+    else if (opt_cxxspec && DECL_EXTERNAL(olddecl) && TREE_CODE (olddecl) == FUNCTION_DECL && DECL_LANG_SPECIFIC(STRIP_TEMPLATE(olddecl))->u.base.selector == 1)
+  {
+    return redefine_decl( newdecl, olddecl );
+  }
+#endif
 
       if (DECL_LANG_SPECIFIC (olddecl) && DECL_USE_TEMPLATE (olddecl))
 	;

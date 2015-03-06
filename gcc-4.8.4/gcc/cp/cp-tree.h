@@ -1989,6 +1989,18 @@ struct GTY(()) lang_decl_fn {
       saved_language_function;
   } GTY ((desc ("%1.pending_inline_p"))) u;
 
+//#ifdef CXXMODEL
+  /* for redefined function */
+#define LANG_DECL_FN_REDEFINE(node)    LANG_DECL_FN_CHECK((node))->redefine
+#define LANG_DECL_FN_ORIGIN(node)      LANG_DECL_FN_CHECK((node))->origin
+#define LANG_DECL_FN_REVISION(node)    LANG_DECL_FN_CHECK((node))->revision
+#define LANG_DECL_FN_CALL_ORIGIN(node) LANG_DECL_FN_CHECK((node))->call_origin
+
+  tree redefine;
+  tree origin;
+  unsigned int revision;
+  bool call_origin;
+//#endif
 };
 
 /* DECL_LANG_SPECIFIC for namespaces.  */

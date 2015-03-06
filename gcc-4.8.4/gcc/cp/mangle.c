@@ -804,6 +804,10 @@ write_name (tree decl, const int ignore_local_scope)
      directly in a local function scope is also mangled with
      <unscoped-name> rather than a full <nested-name>.  */
   if (context == NULL
+#ifdef CXXMODEL
+      // don't add namespace for external declaration
+      || (opt_cxxspec && DECL_EXTERNAL(decl))
+#endif
       || context == global_namespace
       || DECL_NAMESPACE_STD_P (context)
       || (ignore_local_scope
@@ -1278,6 +1282,18 @@ write_unqualified_name (const tree decl)
         write_closure_type_name (type);
       else
         write_source_name (DECL_NAME (decl));
+
+#ifdef CXXMODEL
+    // append a revision number for redefined function
+	  if (opt_cxxspec && TREE_CODE (decl) == FUNCTION_DECL && DECL_LANG_SPECIFIC(STRIP_TEMPLATE(decl))->u.base.selector == 1)
+	  {
+		  if (LANG_DECL_FN_REVISION(decl))
+		  {
+			  write_char('_');
+			  write_unsigned_number(LANG_DECL_FN_REVISION(decl));
+		  }
+	  }
+#endif
     }
 
   tree attrs = (TREE_CODE (decl) == TYPE_DECL

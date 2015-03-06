@@ -594,6 +594,12 @@ c_common_handle_option (size_t scode, const char *arg, int value,
       defer_opt (code, arg);
       break;
 
+#ifdef CXXMODEL
+    case OPT_cxxspec_:
+      defer_opt (OPT_include, arg);
+      break;
+#endif
+
     case OPT_imultilib:
       imultilib = arg;
       break;

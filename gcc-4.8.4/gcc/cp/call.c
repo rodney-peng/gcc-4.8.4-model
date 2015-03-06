@@ -3876,6 +3876,23 @@ build_new_function_call (tree fn, vec<tree, va_gc> **args, bool koenig_p,
   void *p;
   tree result;
 
+#ifdef CXXMODEL
+  if (opt_cxxspec && TREE_CODE(fn) == FUNCTION_DECL && DECL_LANG_SPECIFIC(STRIP_TEMPLATE(fn))->u.base.selector == 1)
+  {
+	  if (! LANG_DECL_FN_CALL_ORIGIN(fn))
+	  {
+		  tree redef = fn;
+
+		  while (LANG_DECL_FN_REDEFINE(redef))
+		      redef = LANG_DECL_FN_REDEFINE(redef);
+
+      fn = redef;
+    }
+    else
+      LANG_DECL_FN_CALL_ORIGIN(fn) = false;
+  }
+#endif
+
   if (args != NULL && *args != NULL)
     {
       *args = resolve_args (*args, complain);

@@ -504,7 +504,11 @@ proper position among the other output files.  */
 /* config.h can define CC1PLUS_SPEC to provide extra args to cc1plus
    or extra switch-translations.  */
 #ifndef CC1PLUS_SPEC
+#ifndef CXXMODEL
 #define CC1PLUS_SPEC ""
+#else
+#define CC1PLUS_SPEC "%{cxxspec*}"
+#endif
 #endif
 
 /* config.h can define LINK_SPEC to provide extra args to the linker

@@ -31,6 +31,9 @@ along with GCC; see the file COPYING3.  If not see
   {".c++", "@c++", 0, 0, 0},
   {".C",   "@c++", 0, 0, 0},
   {".CPP", "@c++", 0, 0, 0},
+#ifdef CXXMODEL
+  {".model", "@c++", 0, 0, 0},
+#endif
   {".H",   "@c++-header", 0, 0, 0},
   {".hpp", "@c++-header", 0, 0, 0},
   {".hp",  "@c++-header", 0, 0, 0},

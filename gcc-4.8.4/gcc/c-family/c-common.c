@@ -462,6 +462,9 @@ const struct c_common_resword c_common_reswords[] =
   { "__is_union",	RID_IS_UNION,	D_CXXONLY },
   { "__label__",	RID_LABEL,	0 },
   { "__null",		RID_NULL,	0 },
+#ifdef CXXMODEL
+  { "__origin",		RID_ORIGIN,	D_CXXONLY | D_CXXWARN },
+#endif
   { "__real",		RID_REALPART,	0 },
   { "__real__",		RID_REALPART,	0 },
   { "__restrict",	RID_RESTRICT,	0 },

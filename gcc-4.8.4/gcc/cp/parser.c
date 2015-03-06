@@ -5351,6 +5351,31 @@ cp_parser_qualifying_entity (cp_parser *parser,
   return scope;
 }
 
+#ifdef CXXMODEL
+static tree cp_parser_call_origin(cp_parser * parser)
+{
+  cp_lexer_consume_token (parser->lexer);  // keyword "__origin"
+
+  if (cp_lexer_peek_token (parser->lexer)->type == CPP_OPEN_PAREN)
+  {
+	  tree scope = current_scope();
+
+	  if (TREE_CODE(scope) == FUNCTION_DECL && DECL_LANG_SPECIFIC(STRIP_TEMPLATE(scope))->u.base.selector == 1)
+	  {
+	    //fprintf( stderr, "%s(%u) %p call origin %p\n", __func__, __LINE__, (void *)scope, (void *)LANG_DECL_FN_ORIGIN(scope) );
+
+		  if (LANG_DECL_FN_ORIGIN(scope))
+		  {
+			  LANG_DECL_FN_CALL_ORIGIN(LANG_DECL_FN_ORIGIN(scope)) = true;
+			  return LANG_DECL_FN_ORIGIN(scope);
+		  }
+	  }
+  }
+
+  return error_mark_node;
+}
+#endif
+
 /* Parse a postfix-expression.
 
    postfix-expression:
@@ -5571,6 +5596,16 @@ cp_parser_postfix_expression (cp_parser *parser, bool address_p, bool cast_p,
 	}
 	break;
       }
+
+#ifdef CXXMODEL
+	case RID_ORIGIN:
+	  if (opt_cxxspec)
+    {
+      postfix_expression = cp_parser_call_origin(parser);
+	    break;
+    }
+    // fall through
+#endif
 
     default:
       {
@@ -9200,6 +9235,39 @@ cp_parser_compound_statement (cp_parser *parser, tree in_statement_expr,
 
   return compound_stmt;
 }
+
+#ifdef CXXMODEL
+static tree
+cp_parser_compound_statement_using_namespace (cp_parser *parser, tree in_statement_expr,
+			      bool in_try, bool function_body, tree ns_decl, tree attribs)
+{
+  tree compound_stmt;
+
+  /* Consume the `{'.  */
+  if (!cp_parser_require (parser, CPP_OPEN_BRACE, RT_OPEN_BRACE))
+    return error_mark_node;
+  if (DECL_DECLARED_CONSTEXPR_P (current_function_decl)
+      && !function_body)
+    pedwarn (input_location, OPT_Wpedantic,
+	     "compound-statement in constexpr function");
+  /* Begin the compound-statement.  */
+  compound_stmt = begin_compound_stmt (in_try ? BCS_TRY_BLOCK : 0);
+
+  parse_using_directive (ns_decl, attribs);
+
+  /* If the next keyword is `__label__' we have a label declaration.  */
+  while (cp_lexer_next_token_is_keyword (parser->lexer, RID_LABEL))
+    cp_parser_label_declaration (parser);
+  /* Parse an (optional) statement-seq.  */
+  cp_parser_statement_seq_opt (parser, in_statement_expr);
+  /* Finish the compound-statement.  */
+  finish_compound_stmt (compound_stmt);
+  /* Consume the `}'.  */
+  cp_parser_require (parser, CPP_CLOSE_BRACE, RT_CLOSE_BRACE);
+
+  return compound_stmt;
+}
+#endif
 
 /* Parse an (optional) statement-seq.
 
@@ -15520,6 +15588,15 @@ cp_parser_using_directive (cp_parser* parser)
   namespace_decl = cp_parser_namespace_name (parser);
   /* And any specified attributes.  */
   attribs = cp_parser_attributes_opt (parser);
+
+#ifdef CXXMODEL
+  if (opt_cxxspec && cp_lexer_peek_token(parser->lexer)->type == CPP_OPEN_BRACE)
+  {
+    cp_parser_compound_statement_using_namespace( parser, NULL_TREE, false, false, namespace_decl, attribs );
+    return;
+  }
+#endif
+
   /* Update the symbol table.  */
   parse_using_directive (namespace_decl, attribs);
   /* Look for the final `;'.  */

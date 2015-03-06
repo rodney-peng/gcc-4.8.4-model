@@ -51,6 +51,13 @@ C ObjC C++ ObjC++ Alias(C)
 -comments-in-macros
 C ObjC C++ ObjC++ Alias(CC)
 
+-cxxspec
+C++ Separate Alias(cxxspec=) MissingArgError(specification file missing after %qs)
+
+-cxxspec=
+C++ Joined Alias(cxxspec=) MissingArgError(specification file missing after %qs)
+
+
 -define-macro
 C ObjC C++ ObjC++ Separate Alias(D) MissingArgError(macro name missing after %qs)
 
@@ -800,6 +807,13 @@ Warn about useless casts
 ansi
 C ObjC C++ ObjC++
 A synonym for -std=c89 (for C) or -std=c++98 (for C++)
+
+cxxspec
+C++ Separate Alias(cxxspec=) MissingArgError(specification file missing after %qs)
+
+cxxspec=
+C++ Separate Joined Var(opt_cxxspec) MissingArgError(specification file missing after %qs)
+Specifies a specification file for C++ model
 
 d
 C ObjC C++ ObjC++ Joined
